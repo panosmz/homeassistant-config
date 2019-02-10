@@ -1,0 +1,284 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Panos' Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: !secret lat
+  longitude: !secret lon
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: !secret elevation
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: !secret tz
+  # Customization file
+  customize: !include customize.yaml
+
+# Enables the frontend
+frontend:
+    themes: !include_dir_merge_named themes
+
+# Enables configuration UI
+config:
+
+auth:
+
+http:
+  # Secrets are defined in the file secrets.yaml
+  api_password: !secret api_password
+  # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+  base_url: !secret base_url
+
+mqtt:
+  broker: !secret mqtt_broker
+  port: !secret mqtt_port
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  discovery: true
+  discovery_prefix: !secret mqtt_discovery_prefix
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+  # Optional, allows Home Assistant developers to focus on popular components.
+  # include_used_components: true
+
+# Discover some devices automatically
+discovery:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+recorder:
+  db_url: !secret db_url
+  include:
+    domains:
+     - sun
+    entities:
+     - alarm_control_panel.mqtt_alarm
+     - climate.ac
+     - sensor.ac_status
+     - light.bookshelf_lights
+     - light.mainlightrgb
+     - light.office_rgb_light
+     - sensor.dark_sky_summary
+     - sensor.dark_sky_temperature
+     - sensor.dark_sky_humidity
+     - sensor.home_environment_status
+     - sensor.home_temperature
+     - sensor.home_humidity
+
+# Enables support for tracking state changes over time
+history:
+  include:
+    domains:
+     - sun
+    entities:
+     - alarm_control_panel.mqtt_alarm
+     - climate.ac
+     - sensor.ac_status
+     - light.bookshelf_lights
+     - light.mainlightrgb
+     - light.office_rgb_light
+     - sensor.dark_sky_summary
+     - sensor.dark_sky_temperature
+     - sensor.dark_sky_humidity
+     - sensor.home_environment_status
+     - sensor.home_temperature
+     - sensor.home_humidity
+
+mqtt_statestream:
+  base_topic: homeassistant
+  publish_attributes: false
+  include:
+    entities:
+     - weather.dark_sky
+     - sun.sun
+
+# View all events in a logbook
+logbook:
+
+# Enables a map showing the location of tracked devices
+#map:
+
+# Track the sun
+sun:
+
+# Weather prediction
+weather:
+  - platform: darksky
+    api_key: !secret darksky_api_key
+
+# Text to speech
+tts:
+  - platform: google
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+google_assistant:
+  project_id: !secret google_project_id
+  api_key: !secret google_api_key
+  exposed_domains:
+    # - switch
+    - light
+    # - group
+    - climate
+  # entity_config:
+  #   switch.kitchen:
+  #     name: CUSTOM_NAME_FOR_GOOGLE_ASSISTANT
+  #     aliases:
+  #       - BRIGHT_LIGHTS
+  #       - ENTRY_LIGHTS
+  #   light.living_room:
+  #     expose: false
+  #     room: LIVING_ROOM
+
+notify:
+   - platform: pushbullet
+     name: notify
+     api_key: !secret pushbullet_api_key
+
+climate:
+  - platform: mqtt
+    name: 'AC'
+    power_command_topic: 'home/ac/power/switch'
+    mode_command_topic: 'home/ac/mode/switch'
+    mode_state_topic: 'home/ac/mode/status'
+    temperature_command_topic: 'home/ac/temperature/switch'
+    temperature_state_topic: 'home/ac/temperature/status'
+    fan_mode_command_topic: 'home/ac/fan/switch'
+    fan_mode_state_topic: 'home/ac/fan/status'
+    swing_mode_command_topic: 'home/ac/swing/switch'
+    swing_mode_state_topic: 'home/ac/swing/status'
+    min_temp: 16
+    max_temp: 30
+
+light:
+  - platform: mqtt
+    name: 'Office RGB Light'
+    state_topic: 'office/rgb1/light/status'
+    command_topic: 'office/rgb1/light/switch'
+    brightness_state_topic: 'office/rgb1/brightness/status'
+    brightness_command_topic: 'office/rgb1/brightness/switch'
+    rgb_state_topic: 'office/rgb1/rgb/status'
+    rgb_command_topic: 'office/rgb1/rgb/switch'
+    brightness_scale: 100
+    optimistic: false
+  - platform: mqtt
+    name: 'Bookshelf Lights'
+    state_topic: 'bedroom/bookshelflights/status'
+    command_topic: 'bedroom/bookshelflights/switch'
+    optimistic: false
+  # - platform: mqtt
+  #   name: 'Christmas Tree'
+  #   state_topic: 'livingroom/xmastree/status'
+  #   command_topic: 'livingroom/xmastree/switch'
+  #   optimistic: false
+
+switch:
+  - platform: mqtt
+    name: 'Sensor Light'
+    state_topic: 'home/plug_env_sensor/light/status'
+    command_topic: 'home/plug_env_sensor/light/switch'
+    optimistic: false
+  - platform: mqtt
+    name: 'Alarm Screen'
+    state_topic: 'home/alarm/screen/status'
+    command_topic: 'home/alarm/screen/switch'
+    optimistic: false
+  - platform: mqtt
+    name: 'Floodlights'
+    state_topic: 'alarm/central/floodlights/status'
+    command_topic: 'alarm/central/floodlights/switch'
+    optimistic: false
+
+tuya:
+  username: !secret tuya_username
+  password: !secret tuya_password
+  country_code: !secret tuya_country_code
+  platform: smart_life
+
+sensor:
+  - platform: darksky
+    api_key: !secret darksky_api_key
+    monitored_conditions:
+      - summary
+      - temperature
+      - humidity
+      - uv_index
+      - wind_speed
+      - precip_intensity
+      - precip_probability
+    units: si
+    update_interval:
+        minutes: 10
+
+sensor 2:
+  - platform: mqtt
+    name: 'Home Temperature'
+    state_topic: 'home/plug_env_sensor/temperature'
+    qos: 1
+    unit_of_measurement: "°C"
+  - platform: mqtt
+    name: 'Home Humidity'
+    state_topic: 'home/plug_env_sensor/humidity'
+    qos: 1
+    unit_of_measurement: "%"
+  - platform: mqtt
+    name: 'Home Environment Status'
+    state_topic: 'home/plug_env_sensor/status'
+    qos: 1
+
+sensor 3:
+  - platform: mqtt
+    name: 'Airquality: LPG'
+    state_topic: 'home/plug_env_sensor/airquality/lpg'
+    qos: 1
+    unit_of_measurement: "ppm"
+  - platform: mqtt
+    name: 'Airquality: CO'
+    state_topic: 'home/plug_env_sensor/airquality/co'
+    qos: 1
+    unit_of_measurement: "ppm"
+  - platform: mqtt
+    name: 'Airquality: Smoke'
+    state_topic: 'home/plug_env_sensor/airquality/smoke'
+    qos: 1
+    unit_of_measurement: "ppm"
+
+sensor 4:
+  - platform: mqtt
+    name: 'AC Status'
+    state_topic: 'home/ac/availability/status'
+    qos: 1    
+
+sensor 5:
+  - platform: mqtt
+    name: 'Light Level'
+    state_topic: 'alarm/central/light_level/status'
+    qos: 1
+    unit_of_measurement: "%"
+
+binary_sensor:
+  - platform: mqtt
+    name: 'Motion'
+    state_topic: 'alarm/central/motion/status'
+    qos: 1
+
+alarm_control_panel:
+  - platform: mqtt
+    state_topic: "home/alarm/status"
+    command_topic: "home/alarm/switch"
+
+input_number:
+   sleep_timer:
+     name: 'Sleep Timer'
+     initial: 15
+     min: 1
+     max: 60
+     step: 1

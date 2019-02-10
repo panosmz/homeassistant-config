@@ -1,0 +1,106 @@
+   default_view:
+     view: yes
+     icon: mdi:home
+     entities:
+       - group.rgb_lights
+       - group.lights
+       - group.climate
+       - group.scripts
+       - group.scenes
+       - group.plug_sensor
+
+   weather_view:
+     view: yes
+     icon: mdi:weather-sunny
+     entities: 
+       - weather.dark_sky
+       - group.weather
+       
+   settings_view:
+     view: yes
+     icon: mdi:tune
+     entities:
+       - group.alarm
+       - group.automations
+       - group.variables
+       - group.rainlight
+
+
+
+### GROUPS #####################################3
+
+   weather:
+     name: Weather Conditions
+     entities:
+       - sun.sun
+       - sensor.dark_sky_summary
+       - sensor.dark_sky_temperature
+       - sensor.dark_sky_humidity
+       - sensor.dark_sky_precip_intensity
+       - sensor.dark_sky_precip_probability
+       - sensor.dark_sky_uv_index
+       - sensor.dark_sky_wind_speed
+   
+   plug_sensor:
+    name: Home Environment
+    entities:
+      - sensor.home_temperature
+      - sensor.home_humidity
+      - sensor.home_environment_status
+      - sensor.airquality_lpg
+      - sensor.airquality_co
+      - sensor.airquality_smoke
+
+   lights:
+    name: Lights
+    entities:
+      - light.bookshelf_lights
+
+   rgb_lights:
+    name: RGB Lights
+    entities:
+      - light.office_rgb_light
+      - light.mainlightrgb
+   
+   automations:
+    name: Automations
+    entities:
+      - automation.smoke_alarm
+
+   scripts:
+    name: Scripts
+    entities:
+      - script.sleep
+
+   variables:
+    name: Variables
+    entities:
+      - input_number.sleep_timer
+
+   climate:
+    name: Air Conditioner
+    entities:
+      - climate.ac
+      - script.send_ac_onekey
+      - sensor.ac_status
+
+   alarm:
+    name: Alarm
+    control: hidden
+    entities:
+      - alarm_control_panel.mqtt_alarm
+      - switch.alarm_screen
+      - binary_sensor.motion
+      - switch.floodlights
+      - sensor.light_level
+   
+   rainlight:
+     name: Rain Light
+     entities:
+      - switch.sensor_light
+
+   scenes:
+     name: Scenes
+     entities:
+      - scene.default
+      - scene.night_lights

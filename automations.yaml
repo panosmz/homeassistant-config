@@ -1,0 +1,161 @@
+#### NOTIFICATIONS #############
+
+  - alias: Smoke Alarm
+    trigger:
+      platform: numeric_state
+      entity_id: sensor.airquality_smoke
+      above: 0
+    action:
+      service: notify.notify
+      data_template:
+        title: "Smoke Detected!"
+        message: "Smoke detected at {{ states.sensor.airquality_smoke.state }} ppm"
+
+  - alias: Alarm Triggered
+    trigger:
+      platform: state
+      entity_id: alarm_control_panel.mqtt_alarm
+      to: 'triggered'
+    action:
+      - service: script.turn_on
+        entity_id: script.do_alarm
+
+#### UNATTENDED ##################
+
+  - alias: Alarm Disarmed
+    trigger:
+      platform: state
+      entity_id: alarm_control_panel.mqtt_alarm
+      to: 'disarmed'
+    action:
+     - service: script.turn_off
+       entity_id: script.trigger_alarm
+     - service: homeassistant.turn_on
+       entity_id: switch.alarm_screen
+     - service: homeassistant.turn_off
+       entity_id: switch.floodlights
+     - service: light.turn_on
+       data:
+         entity_id:
+           - light.office_rgb_light
+         color_name: 'blueviolet'
+     - service: light.turn_on
+       data:
+         entity_id:
+           - light.mainlightrgb
+         color_name: 'green'
+         brightness_pct: 100
+     - delay: '00:00:02'
+     - service: light.turn_on
+       data:
+         entity_id:
+           - light.mainlightrgb
+         color_name: 'white'
+     - delay: '00:00:09'
+     - service: light.turn_off
+       entity_id: light.mainlightrgb
+
+  - alias: Alarm Activated
+    trigger:
+      platform: state
+      entity_id: alarm_control_panel.mqtt_alarm
+      to: 'armed_away'
+    action:
+     - service: light.turn_off
+       data:
+         entity_id: group.all_lights
+     - service: homeassistant.turn_off
+       entity_id: switch.alarm_screen
+
+  - alias: Motion Detected when Away
+    trigger:
+      platform: state
+      entity_id: binary_sensor.motion
+      from: 'off'
+      to: 'on'
+    condition:
+      condition: or
+      conditions:
+      - condition: state
+        entity_id: 'alarm_control_panel.mqtt_alarm'
+        state: 'armed_home'
+      - condition: state
+        entity_id: 'alarm_control_panel.mqtt_alarm'
+        state: 'armed_away'
+    action:
+      - service: homeassistant.turn_on
+        entity_id: switch.floodlights
+      - service: script.turn_on
+        entity_id: script.trigger_alarm
+
+  - alias: Lights On when Away
+    trigger:
+      platform: numeric_state
+      entity_id: sensor.light_level
+      above: 15
+      for:
+        seconds: 3
+    condition:
+      condition: or
+      conditions:
+      - condition: state
+        entity_id: 'alarm_control_panel.mqtt_alarm'
+        state: 'armed_home'
+      - condition: state
+        entity_id: 'alarm_control_panel.mqtt_alarm'
+        state: 'armed_away'
+    action:
+      - service: script.turn_on
+        entity_id: script.do_alarm
+
+  - alias: Rain Light - On
+    trigger:
+      platform: numeric_state
+      entity_id: sensor.dark_sky_precip_probability
+      above: 20.0
+    action:
+      - service: homeassistant.turn_on
+        entity_id: switch.sensor_light
+
+  - alias: Rain Light - Off
+    trigger: 
+      platform: numeric_state
+      entity_id: sensor.dark_sky_precip_probability  
+      below: 19.9  
+    action:
+      - service: homeassistant.turn_off
+        entity_id: switch.sensor_light
+
+  - alias: Alarm Screen Off @ Night
+    trigger:
+      platform: time
+      at: '00:00:00'
+    action:
+      - service: homeassistant.turn_off
+        entity_id: switch.alarm_screen
+
+  - alias: Alarm Screen On @ Morning
+    trigger:
+      platform: time
+      at: '06:55:00'
+    action:
+      - service: homeassistant.turn_on
+        entity_id: switch.alarm_screen
+
+  - alias: Alarm Screen @ Motion
+    trigger:
+      platform: state
+      entity_id: binary_sensor.motion
+      from: 'off'
+      to: 'on'
+    condition:
+      condition: time
+      after: '00:00:01'
+      before: '06:54:20'      
+    action:
+      - service: homeassistant.turn_on
+        entity_id: switch.alarm_screen
+      - delay: '00:00:30'
+      - service: homeassistant.turn_off
+        entity_id: switch.alarm_screen
+

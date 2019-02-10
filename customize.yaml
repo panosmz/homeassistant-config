@@ -1,0 +1,26 @@
+sensor.airquality_smoke:
+  icon: mdi:fire
+sensor.airquality_lpg:
+  icon: mdi:smoke-detector
+sensor.airquality_co:
+  icon: mdi:periodic-table-co2
+sensor.home_humidity:
+  icon: mdi:water-percent
+weather.dark_sky:
+  friendly_name: Weather Forecast
+input_number.sleep_timer:
+  icon: mdi:alarm
+script.sleep:
+  icon: mdi:sleep
+scene.default:
+  icon: mdi:sofa
+scene.night_lights:
+  icon: mdi:weather-night
+script.send_ac_onekey:
+  icon: mdi:remote
+sensor.motion:
+  icon: mdi:walk
+sensor.ac_status:
+  icon: mdi:power-settings
+light.christmas_tree:
+  icon: mdi:pine-tree

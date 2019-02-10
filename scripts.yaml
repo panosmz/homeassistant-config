@@ -1,0 +1,88 @@
+sleep:
+  alias: "Sleep Timer"
+  sequence:
+    - service: light.turn_on
+      data:
+        entity_id: light.office_rgb_light
+        color_name: 'red'
+    - delay: "{{ states('input_number.sleep_timer') | multiply(60) | timestamp_custom('%H:%M:%S',False) }}"
+    - service: homeassistant.turn_off
+      data:
+        entity_id:
+          - light.bookshelf_lights
+          - light.office_rgb_light
+          - light.mainlightrgb
+          - switch.sensor_light
+          - switch.alarm_screen
+
+send_ac_onekey:
+  alias: "AC One Key"
+  sequence:
+    - service: mqtt.publish
+      data_template:
+        topic: 'home/ac/onekey/switch'
+        payload: 'ON'
+
+sunrise:
+  alias: "Sunrise sim"
+  sequence:
+    # light dark red to medium warm orange
+    - service: light.turn_on
+      data:
+        entity_id:
+          - light.office_rgb_light
+          - light.mainlightrgb
+        rgb_color: [98,19,0]
+        brightness: 1
+    - delay:
+        seconds: 1.00
+    - service: light.turn_on
+      data:
+        entity_id:
+          - light.office_rgb_light
+          - light.mainlightrgb
+        rgb_color: [249,123,0]
+        brightness: 103
+        transition: 15
+    - delay:
+        seconds: 15.00
+    # light medium warm orange to full bright
+    - service: light.turn_on
+      data:
+        entity_id:
+          - light.office_rgb_light
+          - light.mainlightrgb
+        rgb_color: [255,178,67]
+        brightness: 255
+        transition: 30
+    - delay:
+        seconds: 30.00
+    # turn bookshelf lights on
+    - service: light.turn_on
+      entity_id: light.bookshelf_lights
+
+
+######### UNATTENDED #########
+
+do_alarm:
+  alias: "ALARM"
+  sequence:
+    - service: notify.notify
+      data_template:
+        title: "Alarm Triggered!"
+        message: 'Alarm triggered at {{now().strftime("%H:%M %Y-%m-%d")}}'
+    - service: light.turn_on
+      data:
+        entity_id:
+          - light.office_rgb_light
+          - light.mainlightrgb
+        color_name: 'red'
+    - service: homeassistant.turn_on
+      entity_id: switch.alarm_screen
+
+trigger_alarm:
+  alias: "Trigger alarm..."
+  sequence:
+    - delay: "00:00:03"
+    - service: script.turn_on
+      entity_id: script.do_alarm
