@@ -4,8 +4,9 @@
 # These will not be ignored
 !*.yaml
 !.gitignore
+!.gitmodules
 !*.md
-!themes/
+!themes
 
 # Ignore folders.
 .storage
