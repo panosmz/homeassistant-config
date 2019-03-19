@@ -114,6 +114,7 @@ weather:
 # Text to speech
 tts:
   - platform: google
+    language: 'el'
 
 group: !include groups.yaml
 automation: !include automations.yaml
@@ -137,6 +138,14 @@ google_assistant:
   #   light.living_room:
   #     expose: false
   #     room: LIVING_ROOM
+
+googlehome:
+  devices:
+    - host: !secret google_home_mini_ip
+
+cast:
+  media_player:
+    - host: !secret google_home_mini_ip
 
 notify:
    - platform: pushbullet
@@ -282,3 +291,7 @@ input_number:
      min: 1
      max: 60
      step: 1
+
+calendar:
+  - platform: todoist
+    token: !secret todoist_api_token
